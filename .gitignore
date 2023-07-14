@@ -1,9 +1,11 @@
 HELP.md
 target/
 src/main/kotlin/com/gofar/books_catalog/configurations
+src/main/resources/application.properties
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
 
 ### STS ###
 .apt_generated
