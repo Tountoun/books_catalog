@@ -55,7 +55,7 @@ class BookController(
             var errorsMap = mutableMapOf<String, String>()
 
             for (error: FieldError in bindingResult.getFieldErrors()) {
-                errorsMap.put(error.field, error.code.toString())
+                errorsMap.put(error.field, error.defaultMessage?: error.code.toString())
             }
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
