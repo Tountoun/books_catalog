@@ -1,4 +1,4 @@
-package com.gofar.books_catalog.utils
+package com.gofar.books_catalog.dao
 
 data class UserDao(
     val username: String,
