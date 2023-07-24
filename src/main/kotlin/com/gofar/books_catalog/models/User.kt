@@ -9,7 +9,7 @@ import lombok.Builder
 data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO,)
-    val id: Long = 0,
+    var id: Long = 0,
     @Column(name = "username")
     var username: String,
     @Column(name = "email", unique = true, nullable = false)
@@ -18,7 +18,9 @@ data class User(
     var password: String,
     @ElementCollection(targetClass = Role::class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    val roles: Set<Role>,
+    var roles: MutableSet<Role>,
     @Column(name = "age")
     var age: Int
-    )
+    ) {
+    constructor(): this(0,"", "", "", mutableSetOf(), 0)
+}

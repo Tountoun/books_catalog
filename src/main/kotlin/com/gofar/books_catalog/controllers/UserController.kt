@@ -3,7 +3,7 @@ package com.gofar.books_catalog.controllers
 import com.gofar.books_catalog.services.UserService
 import com.gofar.books_catalog.utils.Message
 import com.gofar.books_catalog.utils.Role
-import com.gofar.books_catalog.utils.UserDao
+import com.gofar.books_catalog.dao.UserDao
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -29,6 +29,7 @@ class UserController(
                 .status(HttpStatus.CREATED)
                 .body(user)
         }
+        println("Hop")
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(Message("Can't be the new user"))

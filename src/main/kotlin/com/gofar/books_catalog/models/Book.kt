@@ -3,7 +3,7 @@ package com.gofar.books_catalog.models
 import com.gofar.books_catalog.utils.Genre
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
-import java.util.Date
+
 
 @Entity
 data class Book(
@@ -12,13 +12,15 @@ data class Book(
         strategy = GenerationType.AUTO,
     )
     @Column(name = "book_id")
-    val id: Long,
+    var id: Long = 0,
     @NotNull
     @Column(unique = true)
-    val title: String,
-    val author: String = "Unknown",
-    val publicationYear: Int,
+    var title: String,
+    var author: String = "Unknown",
+    var publicationYear: Int,
     @NotNull
     @Enumerated(EnumType.STRING)
-    val genre: Genre
-)
+    var genre: Genre
+) {
+    constructor(): this(0, "", "", 0, Genre.AUTOBIOGRAPHY)
+}

@@ -1,7 +1,6 @@
 package com.gofar.books_catalog.validators
 
-import com.gofar.books_catalog.models.User
-import com.gofar.books_catalog.utils.UserDao
+import com.gofar.books_catalog.dao.UserDao
 import org.springframework.stereotype.Component
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils

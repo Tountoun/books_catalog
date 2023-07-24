@@ -18,24 +18,24 @@ class DatabaseInitializer: CommandLineRunner {
 /*
         val admin = User(
             id = 100,
-            username = "tilltates",
-            email = "tilltates8@gmail.com",
-            password = passwordEncoder.encode("tilltates12"),
-            roles = setOf(Role.ADMIN),
+            username = "llittates",
+            email = "llittates@gmail.com",
+            password = passwordEncoder.encode("llittates12"),
+            roles = mutableSetOf(Role.ADMIN),
             age = 20
         )
         val user = User(
             id = 20,
-            username = "mikeaya",
-            email = "mike@gmail.com",
-            password = passwordEncoder.encode("mikeaya12"),
-            roles = setOf(Role.USER),
+            username = "yacobu",
+            email = "yacobu@gmail.com",
+            password = passwordEncoder.encode("yacobu12"),
+            roles = mutableSetOf(Role.USER),
             age = 14
         )
         val all = listOf<User>(admin, user)
 
         userRepository.saveAll(all)
-*/
+ */
     }
 
 }

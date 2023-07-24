@@ -1,5 +1,6 @@
 package com.gofar.books_catalog.controllers
 
+import com.gofar.books_catalog.dao.BookDao
 import com.gofar.books_catalog.models.Book
 import com.gofar.books_catalog.services.BookService
 import com.gofar.books_catalog.utils.Message
@@ -94,7 +95,7 @@ class BookController(
     }
 
     @PutMapping("/{id}")
-    fun updateBook(@PathVariable(name = "id", required = true) bookId: Long, @RequestBody book: Book): ResponseEntity<Message> {
+    fun updateBook(@PathVariable(name = "id", required = true) bookId: Long, @RequestBody book: BookDao): ResponseEntity<Message> {
         if (bookService.updateBook(bookId, book) != null) {
             return ResponseEntity
                 .status(HttpStatus.OK)

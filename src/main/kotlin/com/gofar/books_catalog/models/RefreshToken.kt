@@ -13,4 +13,6 @@ data class RefreshToken (
     val id: Long = 0,
     @Column(name = "token")
     val refreshValue: String
-)
+) {
+    constructor(): this(0, "")
+}

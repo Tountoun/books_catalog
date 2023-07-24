@@ -1,5 +1,6 @@
 package com.gofar.books_catalog.services
 
+import com.gofar.books_catalog.dao.BookDao
 import com.gofar.books_catalog.exceptions.GenreNotFoundException
 import com.gofar.books_catalog.models.Book
 import com.gofar.books_catalog.repositories.BookRepository
@@ -33,12 +34,13 @@ class BookService(private val bookRepository: BookRepository) {
         return bookRepository.saveAll(books).toList()
     }
 
-    fun createBookList(books: List<Book>) {
-        bookRepository.saveAll(books)
-    }
-
-    fun updateBook(bookId: Long, book: Book): Book? {
+    fun updateBook(bookId: Long, bookDao: BookDao): Book? {
         if (bookRepository.existsById(bookId)) {
+            val book = bookRepository.findById(bookId).get()
+            book.title = bookDao.title?: book.title
+            book.author = bookDao.author?: book.author
+            book.publicationYear = bookDao.publicationYear?: book.publicationYear
+            book.genre = bookDao.genre?: book.genre
             return bookRepository.save(book)
         }
         return null

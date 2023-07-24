@@ -3,7 +3,7 @@ package com.gofar.books_catalog.services
 import com.gofar.books_catalog.models.User
 import com.gofar.books_catalog.repositories.UserRepository
 import com.gofar.books_catalog.utils.Role
-import com.gofar.books_catalog.utils.UserDao
+import com.gofar.books_catalog.dao.UserDao
 import com.gofar.books_catalog.validators.UserDaoValidator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -33,7 +33,7 @@ class UserService(
             password = passwordEncoder.encode(userDao.password),
             email = userDao.email,
             age = userDao.age,
-            roles = setOf(role)
+            roles = mutableSetOf(role)
         )
         return userRepository.save(user)
     }
@@ -74,11 +74,14 @@ class UserService(
         }
         if (userRepository.existsById(id)) {
             val user = userRepository.findById(id).get()
-            user.email = userDao.email
-            user.password = userDao.password
-            user.age = userDao.age
-            user.username = userDao.username
-            return userRepository.save(user)
+            val newUser = User(
+                user.id,
+                userDao.username,
+                userDao.email,
+                userDao.password,
+                user.roles,
+                userDao.age)
+            return userRepository.save(newUser)
         }
         return null
     }
