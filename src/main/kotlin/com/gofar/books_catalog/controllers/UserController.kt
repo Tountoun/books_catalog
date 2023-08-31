@@ -3,7 +3,7 @@ package com.gofar.books_catalog.controllers
 import com.gofar.books_catalog.services.UserService
 import com.gofar.books_catalog.utils.Message
 import com.gofar.books_catalog.utils.Role
-import com.gofar.books_catalog.dao.UserDao
+import com.gofar.books_catalog.dto.UserDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,7 +22,7 @@ class UserController(
 ) {
 
     @PostMapping("/register_user")
-    fun registerUser(@RequestBody userDao: UserDao, bindingResult: BindingResult): ResponseEntity<out Any> {
+    fun registerUser(@RequestBody userDao: UserDto, bindingResult: BindingResult): ResponseEntity<out Any> {
         val user = userService.register(userDao, bindingResult, Role.USER)
         if (user != null) {
             return ResponseEntity
@@ -36,7 +36,7 @@ class UserController(
     }
 
     @PostMapping("/register_admin")
-    fun registerAdmin(@RequestBody userDao: UserDao, bindingResult: BindingResult): ResponseEntity<out Any> {
+    fun registerAdmin(@RequestBody userDao: UserDto, bindingResult: BindingResult): ResponseEntity<out Any> {
         val user = userService.register(userDao, bindingResult, Role.ADMIN)
         if (user != null) {
             return ResponseEntity

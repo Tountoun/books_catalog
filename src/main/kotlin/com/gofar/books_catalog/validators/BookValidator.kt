@@ -19,8 +19,5 @@ class BookValidator: Validator {
 
         val book = target as Book
 
-        if (book.publicationYear !in IntRange(0, 2019)) {
-            errors.rejectValue("publicationYear", "publicationYear.outOfRange")
-        }
     }
 }

@@ -1,13 +1,12 @@
 package com.gofar.books_catalog.controllers
 
 import com.gofar.books_catalog.models.RefreshToken
-import com.gofar.books_catalog.dao.AuthDao
+import com.gofar.books_catalog.dto.AuthDto
 import com.gofar.books_catalog.services.CustomUserDetailsService
 import com.gofar.books_catalog.utils.JwtUtils
 import com.gofar.books_catalog.utils.LoginResponse
 import com.gofar.books_catalog.utils.Message
 import lombok.RequiredArgsConstructor
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
@@ -29,7 +28,7 @@ class AuthController(
 
     @PostMapping("/access_token")
     fun authenticate(
-        @RequestBody authDao: AuthDao
+        @RequestBody authDao: AuthDto
     ): ResponseEntity<LoginResponse> {
         val authentication = UsernamePasswordAuthenticationToken(
             authDao.email,

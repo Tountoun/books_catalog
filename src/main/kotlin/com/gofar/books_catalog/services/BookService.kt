@@ -1,56 +1,76 @@
 package com.gofar.books_catalog.services
 
-import com.gofar.books_catalog.dao.BookDao
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.gofar.books_catalog.dto.BookRequestDto
+import com.gofar.books_catalog.dto.BookResponseDto
+import com.gofar.books_catalog.exceptions.BookException
 import com.gofar.books_catalog.exceptions.GenreNotFoundException
 import com.gofar.books_catalog.models.Book
+import com.gofar.books_catalog.repositories.AuthorRepository
 import com.gofar.books_catalog.repositories.BookRepository
 import com.gofar.books_catalog.utils.Genre
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class BookService(private val bookRepository: BookRepository) {
+class BookService(private val bookRepository: BookRepository, private val authorRepository: AuthorRepository) {
+    @Autowired
+    private lateinit var mapper: ObjectMapper;
 
-    fun getAllBooks(): MutableList<Book> {
-        return bookRepository.findAll()
+    fun getAllBooks(): MutableList<BookResponseDto> {
+        val response = mutableListOf<BookResponseDto>();
+        bookRepository.findAll().forEach { book: Book? ->
+            response.add(mapper.convertValue(book, BookResponseDto::class.java)) };
+        return response;
     }
 
-    fun getSingleBook(bookId: Long): Book? {
-        if(bookRepository.existsById(bookId)) {
-            return bookRepository.findById(bookId).get()
-        }
-        return null
+    fun getSingleBook(bookId: Long): BookResponseDto {
+        val book = bookRepository.findById(bookId).orElseThrow { BookException("Book with id ${bookId} not found") };
+        return mapper.convertValue(book, BookResponseDto::class.java);
     }
+/*
 
-    fun createBook(book: Book): Int {
-        if (bookRepository.existsByTitle(book.title))
-            return -1
-        return bookRepository.save(book).id.toInt()
-    }
-
-    fun createBooks(books: List<Book>): List<Book> {
-        return bookRepository.saveAll(books).toList()
-    }
-
-    fun updateBook(bookId: Long, bookDao: BookDao): Book? {
+    fun getBookWithAuthor(bookId: Long): BookResponseDto? {
         if (bookRepository.existsById(bookId)) {
-            val book = bookRepository.findById(bookId).get()
-            book.title = bookDao.title?: book.title
-            book.author = bookDao.author?: book.author
-            book.publicationYear = bookDao.publicationYear?: book.publicationYear
-            book.genre = bookDao.genre?: book.genre
-            return bookRepository.save(book)
+            val book = bookRepository.findBookWithAuthor(bookId);
+            val dto = mapper.convertValue(book, BookResponseDto::class.java);
+            return dto;
         }
-        return null
+        return null;
+    }
+*/
+
+    fun createBook(bookRequest: BookRequestDto): BookResponseDto {
+        if (bookRepository.existsByIsbn(bookRequest.isbn))
+            throw BookException("Book with isbn number ${bookRequest.isbn} already exists");
+        val author = authorRepository.findById(bookRequest.author_id).orElseThrow{
+            throw BookException("Author with id ${bookRequest.author_id} not found") };
+
+        val book = Book(bookRequest.isbn, bookRequest.title,author, bookRequest.publishYear, bookRequest.genre);
+        bookRepository.save(book);
+        return mapper.convertValue(book, BookResponseDto::class.java);
     }
 
-    fun deleteBook(bookId: Long): Boolean {
+    fun updateBook(bookId: Long, bookRequest: BookRequestDto) {
+        val book = bookRepository.findByIsbn(bookRequest.isbn).orElseThrow {
+            BookException("Book with isbn number ${bookRequest.isbn} already exists") }
+        val author = authorRepository.findById(bookRequest.author_id).orElseThrow{
+            BookException("Author with id ${bookRequest.author_id} not found") };
+        book.title = bookRequest.title;
+        book.author = author;
+        book.genre = bookRequest.genre;
+        book.publishYear = bookRequest.publishYear;
+        bookRepository.saveAndFlush(book);
+    }
+
+    fun deleteBook(bookId: Long) {
         if (bookRepository.existsById(bookId))
-            bookRepository.deleteById(bookId)
-                .run { return true }
-        return false
+            bookRepository.deleteById(bookId);
+        else
+            throw BookException("Book with id ${bookId} not found");
     }
 
     fun searchBook(keyword: String): List<Book> {
@@ -63,7 +83,7 @@ class BookService(private val bookRepository: BookRepository) {
         }
 
         bookRepository
-            .findByTitleContainingOrAuthorContaining(keyword)
+            .findByTitleContaining(keyword)
             .forEach { books.add(it) }
         enumContainingKeyword
             .forEach {
@@ -75,7 +95,7 @@ class BookService(private val bookRepository: BookRepository) {
         return books.toList()
     }
 
-    fun filter(genreValue: String, year: Int): List<Book> {
+    fun filter(genreValue: String, year: String): List<BookResponseDto> {
         var searchGenre: Genre? = null
 
         for (genre: Genre in Genre.values()) {
@@ -84,10 +104,11 @@ class BookService(private val bookRepository: BookRepository) {
             }
         }
         if (searchGenre == null) {
-            throw GenreNotFoundException("Genre not found")
+            throw GenreNotFoundException("Genre ${genreValue} not found")
         }
-        return bookRepository
-                .findByGenreAndPublicationYear(searchGenre, year)
+        return (bookRepository
+                .findByGenreAndPublishYear(searchGenre, year).map {
+                    book -> mapper.convertValue(book, BookResponseDto::class.java) });
 
     }
 

@@ -1,6 +1,6 @@
-package com.gofar.books_catalog.dao
+package com.gofar.books_catalog.dto
 
-data class UserDao(
+data class UserDto(
     val username: String,
     val email: String,
     val password: String,

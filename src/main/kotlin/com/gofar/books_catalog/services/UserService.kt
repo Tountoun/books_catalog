@@ -3,7 +3,7 @@ package com.gofar.books_catalog.services
 import com.gofar.books_catalog.models.User
 import com.gofar.books_catalog.repositories.UserRepository
 import com.gofar.books_catalog.utils.Role
-import com.gofar.books_catalog.dao.UserDao
+import com.gofar.books_catalog.dto.UserDto
 import com.gofar.books_catalog.validators.UserDaoValidator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -18,7 +18,7 @@ class UserService(
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
 
-    fun register(userDao: UserDao, bindingResult: BindingResult, role: Role): User? {
+    fun register(userDao: UserDto, bindingResult: BindingResult, role: Role): User? {
         userDaoValidator.validate(userDao, bindingResult)
 
         if (bindingResult.hasErrors()) {
@@ -62,7 +62,7 @@ class UserService(
         return if (users.isEmpty()) null else users.first()
     }
 
-    fun updateUser(id: Long, userDao: UserDao, bindingResult: BindingResult): User? {
+    fun updateUser(id: Long, userDao: UserDto, bindingResult: BindingResult): User? {
         userDaoValidator.validate(userDao, bindingResult)
 
         if (bindingResult.hasErrors()) {

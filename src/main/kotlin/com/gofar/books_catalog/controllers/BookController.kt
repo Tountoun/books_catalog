@@ -1,16 +1,13 @@
 package com.gofar.books_catalog.controllers
 
-import com.gofar.books_catalog.dao.BookDao
-import com.gofar.books_catalog.models.Book
+import com.gofar.books_catalog.dto.BookRequestDto
+import com.gofar.books_catalog.dto.BookResponseDto
+import com.gofar.books_catalog.exceptions.BookException
+import com.gofar.books_catalog.services.AuthorService
 import com.gofar.books_catalog.services.BookService
 import com.gofar.books_catalog.utils.Message
-import com.gofar.books_catalog.validators.BookValidator
-import org.apache.commons.logging.Log
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.BindingResult
-import org.springframework.validation.FieldError
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -25,92 +22,64 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("api/v1/books")
 class BookController(
     private val bookService: BookService,
-    private val bookValidator: BookValidator
     ) {
 
     @GetMapping
-    fun getBooks(): HttpEntity<List<Book>?> {
-        val books = bookService.getAllBooks()
-        if (books.size != 0) {
-            return ResponseEntity.ok(books)
-        }
-        return ResponseEntity.ok(null)
+    fun getBooks(): ResponseEntity<List<BookResponseDto>> {
+        val books = bookService.getAllBooks();
+        return ResponseEntity.status(HttpStatus.OK).body(books);
     }
 
     @GetMapping("/{id}")
     fun getBook(@PathVariable(name = "id") bookId: Long): ResponseEntity<out Any> {
-        val book = bookService.getSingleBook(bookId)
-        if (book != null) {
-            return ResponseEntity.ok(book)
+        return try {
+            val response = bookService.getSingleBook(bookId);
+            ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (e: BookException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message);
         }
-        return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(Message("Book with id $bookId not found"))
     }
 
     @PostMapping
-    fun createBook(@RequestBody book: Book, bindingResult: BindingResult): ResponseEntity<Message> {
-        bookValidator.validate(book, bindingResult)
-
-        if (bindingResult.hasErrors()) {
-            var errorsMap = mutableMapOf<String, String>()
-
-            for (error: FieldError in bindingResult.getFieldErrors()) {
-                errorsMap.put(error.field, error.defaultMessage?: error.code.toString())
-            }
-            return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Message(errorsMap.toString()))
+    fun createBook(@RequestBody bookRequestDto: BookRequestDto): ResponseEntity<out Any> {
+        return try {
+            val response = bookService.createBook(bookRequestDto);
+            ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (e: BookException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message);
         }
-        val bookReturn = bookService.createBook(book)
-        if (bookReturn != -1)
-            return ResponseEntity
-                .ok(Message("Book created successfully"))
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(Message("Wrong request"))
-    }
-
-    @PostMapping("/list")
-    fun createBooks(@RequestBody books: List<Book>): ResponseEntity<out Any> {
-        val result = bookService.createBooks(books)
-        if (books.isEmpty())
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(Message("No book created"))
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(result)
     }
 
     @DeleteMapping("/{id}")
-    fun deleteBook(@PathVariable(name = "id") bookId: Long): ResponseEntity<Message> {
-        if (bookService.deleteBook(bookId))
-            return ResponseEntity
+    fun deleteBook(@PathVariable(name = "id") bookId: Long): ResponseEntity<String> {
+        return try {
+            bookService.deleteBook(bookId);
+            ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Message("Book with id $bookId deleted successfully"))
-        return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(Message("Book with id $bookId not found"))
+                .body("Book with id ${bookId} deleted successfully");
+        } catch (e: BookException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message);
+        }
     }
 
     @PutMapping("/{id}")
-    fun updateBook(@PathVariable(name = "id", required = true) bookId: Long, @RequestBody book: BookDao): ResponseEntity<Message> {
-        if (bookService.updateBook(bookId, book) != null) {
+    fun updateBook(@PathVariable(name = "id", required = true) bookId: Long, @RequestBody bookRequestDto: BookRequestDto): ResponseEntity<String> {
+        try {
+            bookService.updateBook(bookId, bookRequestDto);
             return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Message("Bood with id $bookId updated successfully"))
+                .body("Book with id ${bookId} updated successfully");
+        } catch (e: BookException) {
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND).body(e.message);
         }
-        return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(Message("Book with id $bookId not found"))
     }
 
     @GetMapping("/search")
     fun searchBook(@RequestParam(name = "query", required = true) keyword: String): ResponseEntity<out Any> {
         val books = bookService.searchBook(keyword)
 
-        if (books.size != 0)
+        if (books.isNotEmpty())
             return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(books)
@@ -122,7 +91,7 @@ class BookController(
     @GetMapping("/filter")
     fun filterByGenreAndYear(
         @RequestParam(name = "genre") genre: String,
-        @RequestParam(name = "year") year: Int
+        @RequestParam(name = "year") year: String
     ): ResponseEntity<out Any> {
         try {
             val books = bookService.filter(genre, year)

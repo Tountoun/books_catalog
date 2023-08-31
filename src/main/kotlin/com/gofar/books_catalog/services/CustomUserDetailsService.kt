@@ -15,7 +15,6 @@ import java.util.Collections
 @Service
 @RequiredArgsConstructor
 class CustomUserDetailsService(
-    @Autowired private val passwordEncoder: PasswordEncoder,
     @Autowired private val userRepository: UserRepository
 ): UserDetailsService {
 

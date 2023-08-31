@@ -1,6 +1,6 @@
 package com.gofar.books_catalog.validators
 
-import com.gofar.books_catalog.dao.UserDao
+import com.gofar.books_catalog.dto.UserDto
 import org.springframework.stereotype.Component
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils
@@ -9,7 +9,7 @@ import org.springframework.validation.Validator
 @Component
 class UserDaoValidator: Validator {
     override fun supports(clazz: Class<*>): Boolean {
-        return UserDao::class.java.isAssignableFrom(clazz)
+        return UserDto::class.java.isAssignableFrom(clazz)
     }
 
     override fun validate(target: Any, errors: Errors) {
@@ -17,7 +17,7 @@ class UserDaoValidator: Validator {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "password.required",  "Password is required")
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "email", "email.required", "Email is required")
 
-        val userDao = target as UserDao
+        val userDao = target as UserDto
 
         if (userDao.username.length < 4) {
             errors.rejectValue("username", "username.minlength", "Username must have at least 6 characters")

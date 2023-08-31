@@ -6,12 +6,12 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 
-@Entity
+//@Entity
 data class RefreshToken (
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Id
+    //@GeneratedValue(strategy = GenerationType.AUTO)
+    //@Id
     val id: Long = 0,
-    @Column(name = "token")
+    //@Column(name = "token")
     val refreshValue: String
 ) {
     constructor(): this(0, "")
